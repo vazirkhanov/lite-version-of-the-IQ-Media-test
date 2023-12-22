@@ -30,7 +30,7 @@ class LinkShortener {
     public function __construct($conn) {
         $this->conn = $conn;
     }
-
+// Метод генерации случайного токена для сокращенной ссылки
     public function generateToken($min = 5, $max = 8) {
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDFEGHIJKLMNOPRSTUVWXYZ0123456789';
         $new_chars = str_split($chars);
@@ -44,10 +44,10 @@ class LinkShortener {
 
         return $token;
     }
-
+// Метод укорачивания заданной ссылки
     public function shortenLink($link) {
         $token = '';
-
+// Продолжаем генерировать токены, пока не будет найден уникальный
         while (true) {
             $token = $this->generateToken();
             $stmt = $this->conn->prepare("SELECT * FROM `links` WHERE `token` = :token");
@@ -58,24 +58,24 @@ class LinkShortener {
                 break;
             }
         }
-
+ // Заливаем ссылку и ее токен в базу данных
         $stmt = $this->conn->prepare("INSERT INTO `links` (`link`, `token`) VALUES (:link, :token)");
         $stmt->bindParam(':link', $link);
         $stmt->bindParam(':token', $token);
         $stmt->execute();
-
+// Возвращаем сокращенную ссылку в случае успеха, в противном случае возвращаем false
         if ($stmt->rowCount() > 0) {
             return $_SERVER['SERVER_NAME'] . '/' . $token;
         } else {
             return false;
         }
     }
-
+// Метод для перенаправления на оригинальную ссылку с использованием токена
     public function redirectToOriginalLink($token) {
         $stmt = $this->conn->prepare("SELECT * FROM `links` WHERE `token` = :token");
         $stmt->bindParam(':token', $token);
         $stmt->execute();
-
+ // Если токен существует, перенаправляем на исходную ссылку; в противном случае выводим сообщение об ошибке
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             header("Location: " . $row['link']);
@@ -93,12 +93,12 @@ $conn = $connection->open();
 // Создание объекта LinkShortener с передачей подключения
 $linkShortener = new LinkShortener($conn);
 
-
+// Выполняем укорачивание или перенаправление ссылок в зависимости от наличия 'cut_link' в параметрах запроса
 if (isset($_GET['cut_link'])) {
     $request = trim($_GET['cut_link']);
     $request = htmlspecialchars($request);
     $shortenedLink = $linkShortener->shortenLink($request);
-
+// Выводим сообщение об успехе или неудаче в зависимости от результата операции укорачивания
     if ($shortenedLink) {
         $_GET['cut_link'] = $shortenedLink;
         // echo "Ссылка добавлена в систему!";
@@ -106,6 +106,7 @@ if (isset($_GET['cut_link'])) {
         // echo "Ссылка не добавлена";
     }
 } else {
+// Если 'cut_link' отсутствует, попытайтесь перенаправить на исходную ссылку, используя токен в URL    
     $URI = $_SERVER['REQUEST_URI'];
     $token = substr($URI, 1);
 
