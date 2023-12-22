@@ -17,9 +17,6 @@
     </style>
 </head>
 <body>
-    <!-- <script>
-        window.location.href = '<?=$_GET['cut_link'];?>'
-    </script> -->
     <div class="container text-center">
         <div class="row" style="margin-top: 20%;">
             <a href="/">
