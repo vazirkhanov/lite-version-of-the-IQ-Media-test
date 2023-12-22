@@ -1,12 +1,13 @@
 <?php
-//Клас для подключения к бд по PDO
+// Класс, отвечающий за управление подключением к базе данных PDO
 class Connection {
+// Параметры подключения к базе данных
     private $server = "mysql:host=127.0.0.1:3308;dbname=ваше имя дб";
     private $username = "ваш логин админа бд";
     private $password = "ваш пароль от бд";
     private $options  = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,);
     protected $conn;
-
+// Метод для открытия соединения с базой данных
     public function open() {
         try {
             $this->conn = new PDO($this->server, $this->username, $this->password, $this->options);
@@ -15,16 +16,17 @@ class Connection {
             echo "There is some problem in connection: " . $e->getMessage();
         }
     }
-
+// Метод для закрытия соединения с базой данных
     public function close() {
         $this->conn = null;
     }
 }
 
-
+// Класс, отвечающий за функциональность укорачивания ссылок
 class LinkShortener {
+// Объект подключения к базе данных - private $conn
     private $conn;
-
+// Конструктор для инициализации с подключением к базе данных
     public function __construct($conn) {
         $this->conn = $conn;
     }
